@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   ToastAndroid
 } from 'react-native'
-import React , {useState, useEffect, Component} from 'react'
+import React , {Component} from 'react'
 import styles from '../styles/main'
 import ShortNavbar from '../components/shortNavbar'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'

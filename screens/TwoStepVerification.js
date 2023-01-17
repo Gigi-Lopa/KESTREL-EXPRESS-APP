@@ -13,7 +13,6 @@ import { AuthContext } from '../components/authContext'
 
 export class TwoStepVerification extends Component {
    
-
     constructor(props){
         super(props)
         this.state = {
@@ -23,22 +22,19 @@ export class TwoStepVerification extends Component {
             codeMatch  : false,
             smsError :  false,
             loading : true,
-
-
         }
     }
     codeVerification = Yup.object().shape({
-        code: Yup.number()
+        code: Yup.number().required()
     })
     onVerify = async (values) =>{
 
-        if(values.code === this.state.code){
+        if(parseInt(values.code) === parseInt(this.state.code)){
             await AsyncStorage.setItem("userId", this.props.route.params.user_zag.toString())
             await AsyncStorage.setItem("UserLoggedIn" , JSON.stringify(true))
             this.props.route.params.signIn_(this.props.route.params.user_zag.toString())
             this.setState({
                 disableButton : false
-                
             })
         }
         else{
@@ -70,7 +66,8 @@ export class TwoStepVerification extends Component {
             if(res.sms == true){
                 this.setState({
                     code :  res.code,
-                    phoneNumber  :res.number_
+                    phoneNumber  :res.number_,
+                    smsError  : false
                 })
             }
             else{
@@ -100,12 +97,15 @@ export class TwoStepVerification extends Component {
                         <Text style = {[styles.h5, styles.grayText, styles.mTop15]}>Loading...</Text>
                     </View>
                 ) :
-                (
+                (<></>)
+            }
+            {
+                
                 this.state.smsError ? (
                     <View style = {[styles.childElem, styles.centerItem]}>
                         <TouchableOpacity onPress={()=>{
                             this.setState({
-                                loading : false,
+                                loading : true,
                                 smsError : false,
                                 codeMatch : false
                             })
@@ -117,104 +117,105 @@ export class TwoStepVerification extends Component {
                             </View>
                         </TouchableOpacity>
                     </View>
-                ) : (
-                    <Formik
-                    initialValues={{ code : ''}}
-                    validateOnMount = {false}
-                    validationSchema = {this.codeVerification}
-                    onSubmit={values =>{ 
-                        this.setState({
-                            disableButton : true
-                        })
-                        this.onVerify(values)
-                        }
-                    }>
-                    {({ handleChange, handleBlur, handleSubmit, values, isValid, touched, errors}) => (
-                        <View style = {
-                            [
-                                styles.childElem,
-                                {
-                                    justifyContent  : 'space-between'
-                                }
-                            ]}>
-                            <View style = {[styles.centerItem, {
-                                marginTop : height * 0.15
-                            }]}>
-                                <Text  style={[
-                                    styles.h3,
-                                    styles.textBold,
-                                    styles.primaryText
+                ) :(
+                    !this.state.loading && !this.state.smsError ? (
+                        <Formik
+                        initialValues={{ code : ''}}
+                        validateOnMount = {false}
+                        validationSchema = {this.codeVerification}
+                        onSubmit={values =>{ 
+                            this.setState({
+                                disableButton : true
+                            })
+                            this.onVerify(values)
+                            }
+                        }>
+                        {({ handleChange, handleBlur, handleSubmit, values, isValid, touched, errors}) => (
+                            <View style = {
+                                [
+                                    styles.childElem,
+                                    {
+                                        justifyContent  : 'space-between'
+                                    }
                                 ]}>
-                                    Two Step Verification
-                                </Text>
-                                <Text>
-                                {
-                                    `We have a verifacation code to ${this.state.phoneNumber[0]}${this.state.phoneNumber[1]}${this.state.phoneNumber[2]}${this.state.phoneNumber[3]}${this.state.phoneNumber[4]}******${this.state.phoneNumber[this.state.phoneNumber.length - 2]}${this.state.phoneNumber[this.state.phoneNumber.length - 1]} via sms. You shall receive it soon`
-                                } 
-                                </Text>
-                                <View style = {styles.mTop25}></View>
-                                <View style = {styles.row}>
-                                    <TextField 
-                                        placeholder = {"Code"}
-                                        value = {values.code}
-                                        onTextChange = {handleChange('code')}
-                                        input_err = {errors.code}
-                                        onBlur = {handleBlur('code')}
-                                        marginNone = {true}
-                                    >
-                                        <Text style = {[
-                                            styles.textBold,{
-                                            marginTop : 4  
-                                        }, styles.primaryText]}>
-                                            KE
-                                        </Text>
-                                    </TextField>
-                                </View>
-                                {
-                                    
-                                }
-                                {
-                                    this.state.codeMatch &&
-                                    <Alert_ status = 'Invalid code.'> 
-                                        <FontAwesome5
-                                            name = 'not-equal'
-                                            size={25}
-                                            color = {'#fff'}
-                                        />
-                                    </Alert_>
-                                }
-                             
-                            </View>
-                            <View>
-                                <TouchableOpacity 
-                                disabled = {this.state.disableButton}    
-                                style ={[
-                                    styles.btn,
-                                    styles.mBot25,
-                                    styles.marginVertical,
-                                    styles.secondaryColor
-                                    ]} 
-                                    onPress = {handleSubmit}>
-                                        {
-                                        this.state.disableButton ? (
-                                            <ActivityIndicator  color = {'#fff'} size = {25} />
-                                        ):(
-                                            <Text style = {[styles.textCenter, styles.tertiaryText]}>
-                                                Verify
+                                <View style = {[styles.centerItem, {
+                                    marginTop : height * 0.15
+                                }]}>
+                                    <Text  style={[
+                                        styles.h3,
+                                        styles.textBold,
+                                        styles.primaryText
+                                    ]}>
+                                        Two Step Verification
+                                    </Text>
+                                    <Text>
+                                    {
+                                        `We have a verifacation code to ${ this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[0]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[1]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[2]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[3]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[4]) : ('*')}******${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[this.state.phoneNumber.length - 2]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[this.state.phoneNumber.length - 1]) : ('*')} via sms. You shall receive it soon`
+                                    } 
+                                    </Text>
+                                    <View style = {styles.mTop25}></View>
+                                    <View style = {styles.row}>
+                                        <TextField 
+                                            placeholder = {"Code"}
+                                            value = {values.code}
+                                            onTextChange = {handleChange('code')}
+                                            input_err = {errors.code}
+                                            onBlur = {handleBlur('code')}
+                                            marginNone = {true}
+                                        >
+                                            <Text style = {[
+                                                styles.textBold,{
+                                                marginTop : 4  
+                                            }, styles.primaryText]}>
+                                                KE
                                             </Text>
-                                        )
-                                    }   
-                                </TouchableOpacity>
+                                        </TextField>
+                                    </View>
+                                    {
+                                        
+                                    }
+                                    {
+                                        this.state.codeMatch &&
+                                        <Alert_ status = 'Invalid code.'> 
+                                            <FontAwesome5
+                                                name = 'not-equal'
+                                                size={18}
+                                                color = {'#fff'}
+                                            />
+                                        </Alert_>
+                                    }
+                                 
+                                </View>
+                                <View>
+                                    <TouchableOpacity 
+                                    disabled = {this.state.disableButton}    
+                                    style ={[
+                                        styles.btn,
+                                        styles.mBot25,
+                                        styles.marginVertical,
+                                        styles.secondaryColor
+                                        ]} 
+                                        onPress = {handleSubmit}>
+                                            {
+                                            this.state.disableButton ? (
+                                                <ActivityIndicator  color = {'#fff'} size = {25} />
+                                            ):(
+                                                <Text style = {[styles.textCenter, styles.tertiaryText]}>
+                                                    Verify
+                                                </Text>
+                                            )
+                                        }   
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </View>
-                    )}
-                </Formik>
+                        )}
+                    </Formik>
+                    )  :(
+                        <></>
+                    )
                 )
-                
-                )
-            }
-           
-           
+                }
+      
         </View>
       </View>
     )

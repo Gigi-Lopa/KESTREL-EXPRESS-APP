@@ -11,6 +11,7 @@ import {
 }
 from "react-native"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import {useNavigation} from '@react-navigation/native';
@@ -68,21 +69,25 @@ export default function LogIn(props) {
                         setPassword_valid(false)
                     },2000)
                 }
-
                 if (res.results.status){
                     try{
                         setDisableButton(false)
-                        navigation.navigate('Verify user', {
-                            user_zag : res.results.USER_ZAG,
-                            signIn_ : signIn
-                        })
+                        if (!res.results.admin){
+                            navigation.navigate('Verify user', {
+                                user_zag : res.results.USER_ZAG,
+                                signIn_ : signIn
+                            })
+                        }else{
+                            await AsyncStorage.setItem("userId", res.results.USER_ZAG.toString())
+                            await AsyncStorage.setItem("UserLoggedIn" , JSON.stringify(true))
+                            signIn(res.results.USER_ZAG.toString())
+                            console.log('Logged In')
+                        }
                     }
                     catch (err){
                         console.log(err)
                     }
-                    
                 }
- 
             })  
             .catch(err =>{
                 setDisableButton(false)

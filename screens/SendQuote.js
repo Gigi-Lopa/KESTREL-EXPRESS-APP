@@ -3,11 +3,11 @@ import {
     Text,
     ScrollView,
     TouchableOpacity,
-    ToastAndroid
+    ToastAndroid,
+    Platform
   } from 'react-native'
-  import React , {useState, useEffect, Component} from 'react'
+  import React , {Component} from 'react'
   import styles from '../styles/main'
-  import ShortNavbar from '../components/shortNavbar'
   import FontAwesome from 'react-native-vector-icons/FontAwesome'
   import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
   import TextField from '../components/textField'
@@ -16,7 +16,6 @@ import {
   import URLS from '../components/URLS'
   import { ActivityIndicator } from 'react-native'
   import Alert_ from '../components/alert'
-  import SmallReceipt from '../components/smallReceipt'
   import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
   import { getApps, initializeApp } from "firebase/app";
   import { firebaseConfig } from '../components/FIREBASE'
@@ -41,6 +40,7 @@ import JobNavigation from './jobNavigation'
       if (!getApps().length) {
         initializeApp(firebaseConfig);
       }
+      alert('Firebase Initialized')
     }
   
     quotationSchema = yup.object().shape({
@@ -117,7 +117,7 @@ import JobNavigation from './jobNavigation'
         values : values,
         receipt : await this.generateString()
       })
-  
+      alert('Receipt Number Generated')
       if(this.props.route.params.shippmentJobs.length != 0){   
         let id = 0
         this.props.route.params.shippmentJobs.map(async(job)=>{
@@ -125,6 +125,8 @@ import JobNavigation from './jobNavigation'
           let name =  this.state.receipt + '00' + id + '.jpg'
           id = id + 1
           if(job.image != null){
+            Platform.OS === 'ios' ? job.image.replace('file://', '') : console.log(false)
+            alert('Creating Blob')
             let blob = await new Promise((resolve, reject)=>{
               const xhr = new XMLHttpRequest();
               xhr.onload = ()=>{
@@ -137,10 +139,11 @@ import JobNavigation from './jobNavigation'
               xhr.open('GET', job.image, true)
               xhr.send(null)
             })
-            
+            alert('Blob Created')
             const fileRef = ref(getStorage(), name);
-            
+            alert('Uploading')
             await uploadBytes(fileRef, blob)
+            alert('Uploaded')
             .then(async (r)=>{
               await getDownloadURL(fileRef)
               .then(url=>{
@@ -166,8 +169,6 @@ import JobNavigation from './jobNavigation'
               index  : this.state.index + 1
             })
           }
-  
-          
         })
       }
     }
