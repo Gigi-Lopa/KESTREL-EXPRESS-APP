@@ -175,10 +175,7 @@ export class AddDeliveryInformationScreen extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.index !== this.state.index) {
-      if(this.state.index === this.props.route.params.shippmentJobs.length - 1){
-        this.postAdditionalInformation(this.state.values)
-      }
-      else if (this.state.index === this.props.route.params.shippmentJobs.length){
+      if (this.state.index === this.props.route.params.shippmentJobs.length){
         this.postAdditionalInformation(this.state.values)
       }
     }

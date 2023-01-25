@@ -9,7 +9,6 @@ import URLS from '../components/URLS'
 import Alert_ from '../components/alert'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 let { height, width } = Dimensions.get("screen")
-import { AuthContext } from '../components/authContext'
 
 export class TwoStepVerification extends Component {
    
@@ -22,6 +21,9 @@ export class TwoStepVerification extends Component {
             codeMatch  : false,
             smsError :  false,
             loading : true,
+            mode : 'sms'
+            ,email  : ''
+            
         }
     }
     codeVerification = Yup.object().shape({
@@ -84,13 +86,76 @@ export class TwoStepVerification extends Component {
         })
     }
     componentDidMount(){
-        this.getCodes()
+       this.getCodes()
+    }
+    tryAgain(){
+
+    }
+    retryWithEmail = () =>{
+        this.setState({
+            mode : 'mail'
+        })
+
+    }
+    getMail = () =>{
+        this.setState({
+            code: '',
+            phoneNumber : '',
+            disableButton : false,
+            codeMatch  : false,
+            smsError :  false,
+            loading : true,
+            email : ''
+        })
+        fetch(URLS.VERIFY_WITH_EMAIL, {
+            method : "POST",
+            headers:{
+                "Accept":"application/json, text/plain, */*",
+                "Content-type":"application/json"
+            },
+            body:JSON.stringify({
+               user_zag : this.props.route.params.user_zag
+            })
+        })
+        .then(res=>{
+            this.setState({
+                loading : false,
+            })
+            return res.json()
+        })
+        .then((res)=>{
+            if(res.email_status == true){
+                this.setState({
+                    code :  res.code,
+                    email  :res.email,
+                    smsError  : false
+                })
+            }
+            else{
+                this.setState({
+                smsError : true
+            })
+        }
+        })
+        .catch(()=>{
+            this.setState({
+                smsError : true
+            })
+        })
+    }
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.mode !== this.state.mode) {
+            if(this.state.mode === 'mail'){
+                this.getMail()
+            }    
+        }
+        
     }
   render() {
     return (
       <View style = {styles.Screen}>
         <View style = {[styles.container]}>
-            {
+        {
                 this.state.loading ? (
                     <View style = {[styles.childElem, styles.centerItem]}>
                         <ActivityIndicator size={50} color = '#8b0000'/>
@@ -100,26 +165,35 @@ export class TwoStepVerification extends Component {
                 (<></>)
             }
             {
-                
-                this.state.smsError ? (
-                    <View style = {[styles.childElem, styles.centerItem]}>
-                        <TouchableOpacity onPress={()=>{
-                            this.setState({
-                                loading : true,
-                                smsError : false,
-                                codeMatch : false
-                            })
+            
+            this.state.smsError ? (
+                <View style = {[styles.childElem, styles.centerItem]}>
+                    <TouchableOpacity onPress={()=>{
+                        this.setState({
+                            code: '',
+                            phoneNumber : '',
+                            disableButton : false,
+                            codeMatch  : false,
+                            smsError :  false,
+                            loading : true,
+                            email  : ''
+                        })
+                        if(this.state.mode === 'sms'){
                             this.getCodes()
-                            }}>
-                            <View>
-                                <Text style = {[styles.h2, styles.textBold,styles.primaryText, styles.textCenter]}>OOP'S !! </Text>
-                                <Text style = {[styles.grayText, styles.mTop15]}>Network error! Tap here and try again</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                ) :(
-                    !this.state.loading && !this.state.smsError ? (
-                        <Formik
+                        }
+                        else{
+                            this.getMail()
+                        }
+                        }}>
+                        <View>
+                            <Text style = {[styles.h2, styles.textBold,styles.primaryText, styles.textCenter]}>OOP'S !! </Text>
+                            <Text style = {[styles.grayText, styles.mTop15]}>Network error! Tap here and try again</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            ) :(
+                !this.state.loading && !this.state.smsError ? (
+                    <Formik
                         initialValues={{ code : ''}}
                         validateOnMount = {false}
                         validationSchema = {this.codeVerification}
@@ -139,7 +213,7 @@ export class TwoStepVerification extends Component {
                                     }
                                 ]}>
                                 <View style = {[styles.centerItem, {
-                                    marginTop : height * 0.15
+                                    marginTop : height * 0.10
                                 }]}>
                                     <Text  style={[
                                         styles.h3,
@@ -148,11 +222,32 @@ export class TwoStepVerification extends Component {
                                     ]}>
                                         Two Step Verification
                                     </Text>
-                                    <Text>
-                                    {
-                                        `We have a verifacation code to ${ this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[0]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[1]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[2]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[3]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[4]) : ('*')}******${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[this.state.phoneNumber.length - 2]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[this.state.phoneNumber.length - 1]) : ('*')} via sms. You shall receive it soon`
-                                    } 
-                                    </Text>
+                                    <View style = {{width: '100%'}}>
+                                        {
+                                            this.state.mode === 'sms' ? (
+                                                <Text>
+                                                    {
+                                                        `We have sent a verification code to ${ this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[0]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[1]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[2]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[3]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[4]) : ('*')}******${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[this.state.phoneNumber.length - 2]) : ('*')}${this.state.phoneNumber.length != 0 ? (this.state.phoneNumber[this.state.phoneNumber.length - 1]) : ('*')} via sms. You shall receipt it soon.`
+                                                    }
+                                                </Text>
+                                            ) : (
+                                                <Text>
+                                                    {
+                                                        `We have sent a verification code to ${this.state.email} via Email. You shall receipt it soon.`
+                                                    }
+                                                </Text>
+                                            )
+                                        }
+                                        {
+                                        this.state.mode === 'sms' ? (
+                                            <View style = {[styles.row, styles.mTop15]}>
+                                                <Text style = {[styles.primaryText, styles.textBold]} onPress={this.retryWithEmail}>Try with Email</Text>
+                                                <Text> if you did'nt receive any SMS.</Text>
+                                            </View>
+                                        ) : (<></>)
+                                        }
+
+                                    </View>
                                     <View style = {styles.mTop25}></View>
                                     <View style = {styles.row}>
                                         <TextField 
@@ -184,7 +279,7 @@ export class TwoStepVerification extends Component {
                                             />
                                         </Alert_>
                                     }
-                                 
+                                    
                                 </View>
                                 <View>
                                     <TouchableOpacity 
@@ -210,11 +305,11 @@ export class TwoStepVerification extends Component {
                             </View>
                         )}
                     </Formik>
-                    )  :(
-                        <></>
-                    )
+                )  :(
+                    <></>
                 )
-                }
+            )
+            }
       
         </View>
       </View>

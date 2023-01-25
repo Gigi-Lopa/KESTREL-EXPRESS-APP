@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useRef} from 'react'
 import  {
     View,
     Text,
@@ -18,6 +18,7 @@ import {Formik} from 'formik'
 import * as yup from 'yup'
 import URLS from '../components/URLS'
 import Alert_ from '../components/alert'
+import PhoneInput from "react-native-phone-number-input";
 
 
 export default function CreateAccount({navigation}) {
@@ -26,12 +27,15 @@ export default function CreateAccount({navigation}) {
     let [createAccountErr, setCreateAccountError] = useState(false)
     let [disableButton, setDisableButton] = useState(false)
     let [networkErr, setNetworkErr] = useState(false)
-   
+    let [number, setNumber] = useState("");
+    let [formattedNumber, setFormattedNumber] = useState("");
+    let [valid, setValid] = useState(false);
+    let phoneInput = useRef(null); 
+
     let CreateAccountSchema = yup.object().shape({
         fullname  : yup.string().required(),
         address : yup.string().required(),
         email :yup.string().email().required(),
-        number  :yup.string().required(),
         date : yup.number().required().max(31),
         month : yup.number().required().max(12),
         year : yup.number().required().max(parseInt(new Date().getFullYear()) - 1).min(1900),
@@ -105,7 +109,6 @@ export default function CreateAccount({navigation}) {
                         fullname: '', 
                         address : '',
                         email : '',
-                        number : '',
                         date:  '',
                         month : '',
                         year  : '',
@@ -117,21 +120,25 @@ export default function CreateAccount({navigation}) {
                     validationSchema = {CreateAccountSchema}
                     onSubmit={values => {
                         setDisableButton(true)
-                        if(values.password === values.confirmPasword){
-                            if(!values.number.startsWith('+')){
-                                ToastAndroid.show("Phone number should start with a country code. eg +123", ToastAndroid.LONG)
-                                setDisableButton(false)
+                        if(formattedNumber != '' && formattedNumber.length  >= 7){
+                            if(values.password === values.confirmPasword){
+                                setFormattedNumber(formattedNumber.replace(' ', ''))
+                                values.number = formattedNumber
+                                values.number  = values.number.replace(' ','')
+                                console.log(values)
+                                createUser(values)
+
                             }
                             else{
-                                values.number = values.number.replace(' ', '')
-                                createUser(values)
+                                setDisableButton(false)
+                                ToastAndroid.show("Password don't match", ToastAndroid.LONG)
                             }
-                            
                         }
                         else{
                             setDisableButton(false)
-                            ToastAndroid.show("Password don't match", ToastAndroid.LONG)
+                            ToastAndroid.show("Provide a valid phone number", ToastAndroid.LONG)
                         }
+                       
                     }}>
                     {({ handleChange, handleBlur, handleSubmit, values, isValid, touched, errors}) => (
                         <View>
@@ -159,6 +166,7 @@ export default function CreateAccount({navigation}) {
                                 onBlur = {handleBlur('address')}
                                 label = {"Address"}
                                 marginNone = {true}
+                                multiline = {true}
 
                             >
                                 <MaterialCommunityIcons
@@ -183,23 +191,30 @@ export default function CreateAccount({navigation}) {
                                     
                                 />
                             </TextField>
-                            <TextField
-                                placeholder = {"Phone Number"}
-                                value = {values.number}
-                                onTextChange = {handleChange('number')}
-                                input_err = {errors.number}
-                                onBlur = {handleBlur('number')}
-                                label = {"Phone Number"}
-                                marginNone = {true}
-                            >
-                                <MaterialCommunityIcons
-                                    name = {"email"}
-                                    size = {25}
-                                    style = {styles.primaryText}
-                                    
-                                />
-                            </TextField>
-                           
+                         
+                         <Text style = {[styles.h5, styles.primaryText, styles.textBold, styles.mBot15]}>{"Phone Number"}</Text>
+                         <PhoneInput
+                            ref={phoneInput}
+                            defaultValue={number}
+                            defaultCode="ZW"
+                            layout="first"
+                            onChangeText={(text) => {
+                                setNumber(text);
+                            }}
+                            onChangeFormattedText={(text) => {
+                                setFormattedNumber(text);
+                            }}
+                            autoFocus
+                            textContainerStyle = {{
+                                backgroundColor : '#fff',
+                                borderColor : '#8b0000',
+                                borderWidth : 2,
+                                borderRadius : 7.5,
+                                width : '100%',
+                            
+                            }}
+                        />  
+                            <View style = {[styles.mBot25]}></View>
                             <View>
                                 <Text style = {[styles.h5, styles.primaryText, styles.textBold]}>{"Date of Birth"}</Text>
                                 <Text style = {[
@@ -276,7 +291,7 @@ export default function CreateAccount({navigation}) {
                                 marginNone = {true}
                             >
                                 <MaterialCommunityIcons
-                                    name = {"key"}
+                                    name = {"account-key"}
                                     size = {25}
                                     style = {styles.primaryText}
                                 />
@@ -292,7 +307,7 @@ export default function CreateAccount({navigation}) {
                                 marginNone = {true}
                             >
                                 <MaterialCommunityIcons
-                                    name = {"key"}
+                                    name = {"account-key"}
                                     size = {25}
                                     style = {styles.primaryText}
                                 />

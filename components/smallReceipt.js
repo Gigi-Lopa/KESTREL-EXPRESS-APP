@@ -107,12 +107,13 @@ export default function SmallReceipt(props) {
               <ReceiptRow label ={'Total Cost : '}>
                   <Text style = {[
                     styles.textBold,
-                    styles.h5S
+                    styles.h5
                     ]}>
                     <Status status  = {'PENDING'} COLOR = {'yl'}/>
                   </Text>
               </ReceiptRow>
             </ScrollView>
+            <Text style = {[styles.h5, styles.grayText]}>On the home screen pull up to refresh orders.</Text>
             <View style = {[styles.row, styles.mTop25]}>
                 <TouchableOpacity style ={[styles.rowBtn, styles.primary_color, styles.marginVertical, {
                   width: '100%'
@@ -121,9 +122,7 @@ export default function SmallReceipt(props) {
                     Book again
                 </Text>
                 </TouchableOpacity>
-          
             </View>
-            
           </View>
          
         </View>

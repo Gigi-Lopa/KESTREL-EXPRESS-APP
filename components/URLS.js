@@ -1,5 +1,6 @@
 let IPADDRESS = "https://kestrelexpress.onrender.com"
 //let IPADDRESS = 'http://192.168.42.60:1927'
+
 let URLS ={
     IPADDRESS,
     CREATE_USER :  `${IPADDRESS}/create/user/`,
@@ -23,7 +24,8 @@ let URLS ={
     GET_QUOTATIONS :  `${IPADDRESS}/get/quotations/for?`,
     VERIFY_USER : `${IPADDRESS}/verify/user`,
     VERIFY_EMAIL  : `${IPADDRESS}/reset/password`,
-    CHECK_DELETION : `${IPADDRESS}/check/deletion?for=`
+    CHECK_DELETION : `${IPADDRESS}/check/deletion?for=`,
+    VERIFY_WITH_EMAIL  :`${IPADDRESS}/verify/with/mail`
 
 }
 export default URLS

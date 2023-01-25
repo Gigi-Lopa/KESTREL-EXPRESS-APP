@@ -40,7 +40,8 @@ import JobNavigation from './jobNavigation'
       if (!getApps().length) {
         initializeApp(firebaseConfig);
       }
-      alert('Firebase Initialized')
+      alert('Application Initialized')
+
     }
   
     quotationSchema = yup.object().shape({
@@ -117,7 +118,8 @@ import JobNavigation from './jobNavigation'
         values : values,
         receipt : await this.generateString()
       })
-      alert('Receipt Number Generated')
+      alert('Receipt Generated')
+     
       if(this.props.route.params.shippmentJobs.length != 0){   
         let id = 0
         this.props.route.params.shippmentJobs.map(async(job)=>{
@@ -126,7 +128,7 @@ import JobNavigation from './jobNavigation'
           id = id + 1
           if(job.image != null){
             Platform.OS === 'ios' ? job.image.replace('file://', '') : console.log(false)
-            alert('Creating Blob')
+           
             let blob = await new Promise((resolve, reject)=>{
               const xhr = new XMLHttpRequest();
               xhr.onload = ()=>{
@@ -140,10 +142,11 @@ import JobNavigation from './jobNavigation'
               xhr.send(null)
             })
             alert('Blob Created')
+           
             const fileRef = ref(getStorage(), name);
-            alert('Uploading')
+          
             await uploadBytes(fileRef, blob)
-            alert('Uploaded')
+        
             .then(async (r)=>{
               await getDownloadURL(fileRef)
               .then(url=>{
@@ -152,6 +155,8 @@ import JobNavigation from './jobNavigation'
                   index  : this.state.index + 1
                 })
                 blob.close();
+                alert('image Uploaded')
+
               })
              
             })
@@ -175,10 +180,7 @@ import JobNavigation from './jobNavigation'
   
     componentDidUpdate(prevProps, prevState) {
       if (prevState.index !== this.state.index) {
-        if(this.state.index === this.props.route.params.shippmentJobs.length - 1){
-          this.postAdditionalInformation(this.state.values)
-        }
-        else if (this.state.index === this.props.route.params.shippmentJobs.length){
+        if (this.state.index === this.props.route.params.shippmentJobs.length){
           this.postAdditionalInformation(this.state.values)
         }
       }

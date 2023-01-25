@@ -59,7 +59,7 @@ export default function LogIn(props) {
                     setEmail_valid(true)
                     setTimeout(()=>{
                         setEmail_valid(false)
-                    },2000)
+                    },5000)
                 }
                 
                 if(!res.results.password){
@@ -67,7 +67,7 @@ export default function LogIn(props) {
                     setPassword_valid(true)
                     setTimeout(()=>{
                         setPassword_valid(false)
-                    },2000)
+                    },5000)
                 }
                 if (res.results.status){
                     try{
@@ -161,7 +161,7 @@ export default function LogIn(props) {
 
                                     >
                                         <MaterialCommunityIcons
-                                            name = {"key"}
+                                            name = {"account-key"}
                                             size = {25}
                                             style = {styles.primaryText}
                                         />

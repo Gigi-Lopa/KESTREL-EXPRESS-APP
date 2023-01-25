@@ -43,7 +43,7 @@ export default function WelcomeActitvity({navigation}) {
                         styles.tertiaryText,
                         styles.textBold]}
                     >
-                        Create Account    
+                        Create an account    
                     </Text>
                 </TouchableOpacity>
             </View>
